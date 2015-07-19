@@ -89,7 +89,7 @@ Now, imput the mean values in the new database
 activity.imputed[na.rows,1] <- na.intervals.mean
 ```
 
-3. First, grouping dy date and summarizing the imputed dataset
+3. First, grouping dy date and summarizing the imputed dataset by adding it all
 ```{r}
 activity.imputed_date <- group_by(activity.imputed,date)
 activity.imputed_date <- summarize(activity.imputed_date,total = sum(steps))
@@ -115,8 +115,8 @@ median.imputed.date
 The imputed mean differs `r (1-mean.imputed.date/mean.date)*100`% from the original value. And the median differs `r (1-median.imputed.date/median.date)*100`%.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-1. First of all, setting language to assure that weekdays are returnd in English
-```{r}
+1. First of all, setting language to assure that weekdays are returned in English.
+```{r results='hide'}
 Sys.setlocale("LC_TIME", "en_US.UTF-8")
 ```
 Set default value of the column weekday to "weekday". Using dplyr
@@ -135,7 +135,7 @@ activity.imputed_int <- group_by(activity.imputed,interval,weekday)
 activity.imputed_int <- summarize(activity.imputed_int,mean = mean(steps))
 ```
 Plot dividing in two panels according to weekday
-```{r message=FALSE}
+```{r message=FALSE,warning=FALSE}
 require(ggplot2)
 g <- ggplot(activity.imputed_int, aes(interval, mean))
 g <- g + 

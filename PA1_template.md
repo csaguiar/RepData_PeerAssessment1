@@ -82,14 +82,13 @@ The maximum number the steps taken in an interval was 206.1698113 in the interva
 ## Imputing missing values
 1. The number of missing values in the activity dataset is 2304.
 
-2. Duplicating the dataset.
+2. First, Duplicating the dataset.
 
 ```r
 activity.imputed <- activity
-#activity.imputed[is.na(activity.imputed$steps),1] <- activity_int[activity_int$interval==activity.imputed[is.na(activity.imputed$steps),3],2]
 ```
 
-3. The strategy for filling NA values is to use the mean for respective interval averaged for all days. First, determine the NA rows in dataset and the respective intervals in these rows.
+The strategy adopted for filling NA values is to use the mean for respective interval averaged for all days. First, determine the NA rows in dataset and the respective intervals in these rows.
 
 ```r
 na.rows <- which(is.na(activity.imputed$steps))
@@ -97,13 +96,13 @@ na.intervals <- activity.imputed[na.rows,3]
 na.intervals.mean <- activity_int[match(na.intervals,activity_int$interval),2]
 ```
 
-4. Now, imput the mean values in the new database
+Now, imput the mean values in the new database
 
 ```r
 activity.imputed[na.rows,1] <- na.intervals.mean
 ```
 
-5. Grouping dy date and summarizing the imputed dataset
+3. First, grouping dy date and summarizing the imputed dataset by adding it all
 
 ```r
 activity.imputed_date <- group_by(activity.imputed,date)
@@ -113,7 +112,7 @@ hist(activity.imputed_date$total,breaks = 10,xlab = "total number of steps",main
 
 ![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
 
-6. The mean of imputed dataset is: 
+The mean of imputed dataset is: 
 
 ```r
 mean.imputed.date <- mean(activity.imputed_date$total)
@@ -136,3 +135,42 @@ median.imputed.date <- median(activity.imputed_date$total)
 The imputed mean differs 0% from the original value. And the median differs -0.0110421%.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+1. First of all, setting language to assure that weekdays are returned in English.
+
+```r
+Sys.setlocale("LC_TIME", "en_US.UTF-8")
+```
+Set default value of the column weekday to "weekday". Using dplyr
+
+```r
+activity.imputed <- mutate(activity.imputed,weekday = "weekday")
+```
+Now, setting weekend to "weekend" and creating a factor of this column
+
+```r
+activity.imputed[weekdays(activity.imputed$date,abbreviate = TRUE)=="Sat" | weekdays(activity.imputed$date,abbreviate = TRUE)=="Sun",4] <- "weekend"
+activity.imputed$weekday <- as.factor(activity.imputed$weekday)
+```
+
+2. Grouping the dataset in interval and weekdays. Hence, summarizing by mean of steps taken
+
+```r
+activity.imputed_int <- group_by(activity.imputed,interval,weekday)
+activity.imputed_int <- summarize(activity.imputed_int,mean = mean(steps))
+```
+Plot dividing in two panels according to weekday
+
+```r
+require(ggplot2)
+g <- ggplot(activity.imputed_int, aes(interval, mean))
+g <- g + 
+  geom_line() + # Adding points
+  facet_wrap( ~ weekday, ncol = 1) + # Panels by type
+  labs(x = "Interval") + # X label
+  labs(y = "Total mean number of steps") + # Y label
+  labs(title = "Total number of steps") # Title
+
+print(g)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-24-1.png) 
